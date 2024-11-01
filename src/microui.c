@@ -1117,8 +1117,12 @@ int mu_begin_window_ex(mu_Context *ctx, const char *title, mu_Rect rect, int opt
       mu_update_control(ctx, id, tr, opt);
       mu_draw_control_text(ctx, title, tr, MU_COLOR_TITLETEXT, opt);
       if (id == ctx->focus && ctx->mouse_down == MU_MOUSE_LEFT) {
-        cnt->rect.x += ctx->mouse_delta.x;
-        cnt->rect.y += ctx->mouse_delta.y;
+        if (ctx->mouse_pressed == MU_MOUSE_LEFT) {
+          ctx->drag_start_mouse_pos = ctx->mouse_pos;
+          ctx->drag_start_scroll_pos = mu_vec2(cnt->rect.x, cnt->rect.y);
+        }
+        cnt->rect.x = ctx->drag_start_scroll_pos.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x);
+        cnt->rect.y = ctx->drag_start_scroll_pos.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y);
       }
       body.y += tr.h;
       body.h -= tr.h;
@@ -1146,8 +1150,12 @@ int mu_begin_window_ex(mu_Context *ctx, const char *title, mu_Rect rect, int opt
     mu_Rect r = mu_rect(rect.x + rect.w - sz, rect.y + rect.h - sz, sz, sz);
     mu_update_control(ctx, id, r, opt);
     if (id == ctx->focus && ctx->mouse_down == MU_MOUSE_LEFT) {
-      cnt->rect.w = mu_max(96, cnt->rect.w + ctx->mouse_delta.x);
-      cnt->rect.h = mu_max(64, cnt->rect.h + ctx->mouse_delta.y);
+      if (ctx->mouse_pressed == MU_MOUSE_LEFT) {
+        ctx->drag_start_mouse_pos = ctx->mouse_pos;
+        ctx->drag_start_scroll_pos = mu_vec2(cnt->rect.w, cnt->rect.h);
+      }
+      cnt->rect.w = mu_max(96, ctx->drag_start_scroll_pos.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x));
+      cnt->rect.h = mu_max(64, ctx->drag_start_scroll_pos.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y));
     }
   }
 
