@@ -206,15 +206,14 @@ struct mu_Context {
   /* input state */
   mu_Vec2 mouse_pos;
   mu_Vec2 last_mouse_pos;
-  mu_Vec2 mouse_delta;
+  mu_Vec2 drag_start_mouse_pos;
+  mu_Vec2 drag_start_value;
   mu_Vec2 scroll_delta;
   int mouse_down;
   int mouse_pressed;
   int key_down;
   int key_pressed;
   char input_text[32];
-  mu_Vec2 drag_start_mouse_pos;
-  mu_Vec2 drag_start_scroll_pos;
 };
 
 

@@ -142,8 +142,6 @@ void mu_begin(mu_Context *ctx) {
   ctx->scroll_target = NULL;
   ctx->hover_root = ctx->next_hover_root;
   ctx->next_hover_root = NULL;
-  ctx->mouse_delta.x = ctx->mouse_pos.x - ctx->last_mouse_pos.x;
-  ctx->mouse_delta.y = ctx->mouse_pos.y - ctx->last_mouse_pos.y;
   ctx->frame++;
 }
 
@@ -912,7 +910,11 @@ int mu_number_ex(mu_Context *ctx, mu_Real *value, mu_Real step,
 
   /* handle input */
   if (ctx->focus == id && ctx->mouse_down == MU_MOUSE_LEFT) {
-    *value += ctx->mouse_delta.x * step;
+    if (ctx->mouse_pressed == MU_MOUSE_LEFT) {
+      ctx->drag_start_mouse_pos = ctx->mouse_pos;
+      ctx->drag_start_value.x = *value;
+    }
+    *value = ctx->drag_start_value.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x) * step;
   }
   /* set flag if value changed */
   if (*value != last) { res |= MU_RES_CHANGE; }
@@ -1008,9 +1010,9 @@ void mu_end_treenode(mu_Context *ctx) {
       if (ctx->focus == id && ctx->mouse_down == MU_MOUSE_LEFT) {           \
         if (ctx->mouse_pressed == MU_MOUSE_LEFT) {                          \
           ctx->drag_start_mouse_pos = ctx->mouse_pos;                       \
-          ctx->drag_start_scroll_pos = cnt->scroll;                         \
+          ctx->drag_start_value = cnt->scroll;                              \
         }                                                                   \
-        cnt->scroll.y = ctx->drag_start_scroll_pos.y +                      \
+        cnt->scroll.y = ctx->drag_start_value.y +                           \
           (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y) * cs.y / base.h; \
       }                                                                     \
       /* clamp scroll to limits */                                          \
@@ -1119,10 +1121,10 @@ int mu_begin_window_ex(mu_Context *ctx, const char *title, mu_Rect rect, int opt
       if (id == ctx->focus && ctx->mouse_down == MU_MOUSE_LEFT) {
         if (ctx->mouse_pressed == MU_MOUSE_LEFT) {
           ctx->drag_start_mouse_pos = ctx->mouse_pos;
-          ctx->drag_start_scroll_pos = mu_vec2(cnt->rect.x, cnt->rect.y);
+          ctx->drag_start_value = mu_vec2(cnt->rect.x, cnt->rect.y);
         }
-        cnt->rect.x = ctx->drag_start_scroll_pos.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x);
-        cnt->rect.y = ctx->drag_start_scroll_pos.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y);
+        cnt->rect.x = ctx->drag_start_value.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x);
+        cnt->rect.y = ctx->drag_start_value.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y);
       }
       body.y += tr.h;
       body.h -= tr.h;
@@ -1152,10 +1154,10 @@ int mu_begin_window_ex(mu_Context *ctx, const char *title, mu_Rect rect, int opt
     if (id == ctx->focus && ctx->mouse_down == MU_MOUSE_LEFT) {
       if (ctx->mouse_pressed == MU_MOUSE_LEFT) {
         ctx->drag_start_mouse_pos = ctx->mouse_pos;
-        ctx->drag_start_scroll_pos = mu_vec2(cnt->rect.w, cnt->rect.h);
+        ctx->drag_start_value = mu_vec2(cnt->rect.w, cnt->rect.h);
       }
-      cnt->rect.w = mu_max(96, ctx->drag_start_scroll_pos.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x));
-      cnt->rect.h = mu_max(64, ctx->drag_start_scroll_pos.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y));
+      cnt->rect.w = mu_max(96, ctx->drag_start_value.x + (ctx->mouse_pos.x - ctx->drag_start_mouse_pos.x));
+      cnt->rect.h = mu_max(64, ctx->drag_start_value.y + (ctx->mouse_pos.y - ctx->drag_start_mouse_pos.y));
     }
   }
 
