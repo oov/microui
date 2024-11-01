@@ -813,6 +813,10 @@ int mu_textbox_raw(mu_Context *ctx, char *buf, int bufsz, mu_Id id, mu_Rect r,
     mu_draw_text(ctx, font, buf, -1, mu_vec2(textx, texty), color);
     mu_draw_rect(ctx, mu_rect(textx + textw, texty, 1, texth), color);
     mu_pop_clip_rect(ctx);
+
+    mu_Command *cmd = mu_push_command(ctx, MU_COMMAND_CARET, sizeof(mu_CaretCommand));
+    cmd->caret.font = font;
+    cmd->caret.pos = mu_vec2(textx + textw, texty);
   } else {
     mu_draw_control_text(ctx, buf, r, MU_COLOR_TEXT, opt);
   }
