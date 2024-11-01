@@ -213,6 +213,8 @@ struct mu_Context {
   int key_down;
   int key_pressed;
   char input_text[32];
+  mu_Vec2 drag_start_mouse_pos;
+  mu_Vec2 drag_start_scroll_pos;
 };
 
 
