@@ -871,7 +871,9 @@ int mu_slider_ex(mu_Context *ctx, mu_Real *value, mu_Real low, mu_Real high,
   if (ctx->focus == id &&
       (ctx->mouse_down | ctx->mouse_pressed) == MU_MOUSE_LEFT)
   {
-    v = low + (ctx->mouse_pos.x - base.x) * (high - low) / base.w;
+    w = ctx->style->thumb_size;
+    x = mu_clamp(ctx->mouse_pos.x - base.x - (w / 2), 0, base.w - w);
+    v = low + (x * (high - low)) / (base.w - w);
     if (step) { v = ((long long)((v + step / 2) / step)) * step; }
   }
   /* clamp and store value, update res */
